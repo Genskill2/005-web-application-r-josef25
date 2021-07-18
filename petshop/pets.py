@@ -1,4 +1,5 @@
 import datetime
+import random
 
 from flask import Blueprint
 from flask import render_template, request, redirect, url_for, jsonify
@@ -85,7 +86,15 @@ def edit(pid):
     elif request.method == "POST":
         description = request.form.get('description')
         sold = request.form.get("sold")
+        cursor.execute("select p.bought from pet p where p.id = ?",[pid])
+        bought, = cursor.fetchone()
+        bought = datetime.datetime.strptime(bought, '%Y-%m-%d').date() 
+        if sold :
+            sold = bought + datetime.timedelta(days=random.randint(5, 30))
         # TODO Handle sold
+        cursor.execute(f"UPDATE pet SET sold = ? , description = ? WHERE id = ?", [sold, description,pid])
+        cursor.close()
+        conn.commit()
         return redirect(url_for("pets.pet_info", pid=pid), 302)
         
     
