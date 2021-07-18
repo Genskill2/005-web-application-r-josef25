@@ -105,11 +105,14 @@ def edit(pid):
     elif request.method == "POST":
         description = request.form.get('description')
         sold = request.form.get("sold")
-        cursor.execute("select p.bought from pet p where p.id = ?",[pid])
-        bought, = cursor.fetchone()
+        cursor.execute("select p.bought,p.sold from pet p where p.id = ?",[pid])
+        bought,sold_ = cursor.fetchone()
         bought = datetime.datetime.strptime(bought, '%Y-%m-%d').date() 
         if sold :
-            sold = bought + datetime.timedelta(days=random.randint(5, 30))
+            if sold_ == "":
+                sold = bought + datetime.timedelta(days=random.randint(5, 30))
+            else :
+                sold = sold_
         # TODO Handle sold
         cursor.execute(f"UPDATE pet SET sold = ? , description = ? WHERE id = ?", [sold, description,pid])
         cursor.close()
